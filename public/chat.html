@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Chat</h1>
+    <form id="messageForm" onsubmit="handleMessage(event)">
+        <input id="message" type="text" name="message" placeholder="Enter your message" required>
+        <button type="submit">Send</button>
+    </form>
+    <ul id="messages"></ul>
+
+    <script>
+        async function handleMessage(event) {
+            event.preventDefault();
+            const username = localStorage.getItem('username');
+            const message = document.getElementById('message').value;
+
+            const response = await fetch('/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, message }),
+            });
+
+            const messages = await response.json();
+            displayMessages(messages);
+        }
+
+        async function loadMessages() {
+            const response = await fetch('/messages');
+            const messages = await response.json();
+            displayMessages(messages);
+        }
+
+        function displayMessages(messages) {
+            const messageList = document.getElementById('messages');
+            messageList.innerHTML = '';
+            messages.forEach(msg => {
+                const li = document.createElement('li');
+                li.textContent = `${msg.username}: ${msg.message}`;
+                messageList.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMessages);
+    </script>
+</body>
+</html>
